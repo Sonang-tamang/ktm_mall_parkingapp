@@ -3,14 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final String baseUrl = 'https://parking.goodwish.com.np/api';
+  final String baseUrl = 'https://novel-finch-neat.ngrok-free.app/api';
 
   Future<Map<String, dynamic>?> login(String username, String password) async {
     final url = Uri.parse('$baseUrl/users/login/');
-    final headers = {
-      'tenant': 'ktm-mall.parking.goodwish.com.np',
-      'Content-Type': 'application/json'
-    };
+    final headers = {'tenant': 'ranjana', 'Content-Type': 'application/json'};
     final body = jsonEncode({'username': username, 'password': password});
 
     try {

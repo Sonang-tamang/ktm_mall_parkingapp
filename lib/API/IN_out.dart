@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class VehicleService {
-  static const String baseUrl = "https://parking.goodwish.com.np/api/";
+  static const String baseUrl = "https://novel-finch-neat.ngrok-free.app/api/";
 
   // Headers for the API requests
   Map<String, String> headers(String token) {
     return {
-      "tenant": "ktm-mall.parking.goodwish.com.np",
+      "tenant": "ranjana",
       "Authorization": "Token $token",
       "Content-Type": "application/json",
     };
@@ -32,8 +32,11 @@ class VehicleService {
     });
 
     try {
-      final response =
-          await http.post(url, headers: headers(token), body: body);
+      final response = await http.post(
+        url,
+        headers: headers(token),
+        body: body,
+      );
 
       print('Response Status: ${response.statusCode}');
       print('Response Body: ${response.body}');
@@ -46,7 +49,7 @@ class VehicleService {
         return {
           'error': 'Failed to check in',
           'status_code': response.statusCode,
-          'response_body': response.body
+          'response_body': response.body,
         };
       }
     } catch (e) {
@@ -79,8 +82,11 @@ class VehicleService {
     });
 
     try {
-      final response =
-          await http.post(url, headers: headers(token), body: body);
+      final response = await http.post(
+        url,
+        headers: headers(token),
+        body: body,
+      );
 
       print('Response Status: ${response.statusCode}');
       print('Response Body: ${response.body}');
@@ -93,7 +99,7 @@ class VehicleService {
         return {
           'error': 'Failed to check out',
           'status_code': response.statusCode,
-          'response_body': response.body
+          'response_body': response.body,
         };
       }
     } catch (e) {

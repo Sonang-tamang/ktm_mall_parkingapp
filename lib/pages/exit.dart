@@ -166,7 +166,7 @@ class _ExitState extends State<Exit> {
       }
     } else if (vehicleType == 'FOUR_WHEELER') {
       if (duration <= 30) {
-        fee = 40;
+        fee = 45;
       } else if (duration <= 60) {
         fee = crunnet_four_rate;
       } else {
@@ -312,7 +312,7 @@ class _ExitState extends State<Exit> {
 
     // Printing
     await SunmiPrinter.printText(
-      'Kathmandu-mall \nParking Slip',
+      'Ranjana Trade Center \nParking Slip \nGrand Machhapuchehhre Technology',
       style: SunmiTextStyle(bold: true, fontSize: 40),
     );
     await SunmiPrinter.lineWrap(20);

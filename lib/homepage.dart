@@ -36,9 +36,8 @@ class _HomepageState extends State<Homepage> {
   String RID = "";
   DateTime? CT;
 
-  // user details to Storre
+  // user details to Store
   String token = "";
-
   String username = "";
   String email = "";
   int id = 0;
@@ -59,7 +58,6 @@ class _HomepageState extends State<Homepage> {
     setState(() {
       username = prefs.getString('username') ?? '';
       token = prefs.getString('token') ?? '';
-
       email = prefs.getString('email') ?? "";
       id = prefs.getInt('id') ?? 0;
       first_name = prefs.getString('first_name') ?? '';
@@ -81,21 +79,6 @@ class _HomepageState extends State<Homepage> {
       print('Failed to fetch rates');
     }
   }
-
-  // void chekin() {
-  //   // For Check-in
-  //   vehicleService
-  //       .checkIn(
-  //     receiptId: "12345",
-  //     vehicleNumber: "ABC-1234",
-  //     vehicleType: "Car",
-  //     checkinTime: "2025-01-22T10:00:00",
-  //     checkedinBy: "User",
-  //   )
-  //       .then((response) {
-  //     print(response);
-  //   });
-  // }
 
   void _showprofile(String tabName, String email) {
     showDialog(
@@ -122,8 +105,6 @@ class _HomepageState extends State<Homepage> {
   }
 
   void _showPopup(BuildContext context) {
-    // final TextEditingController _VController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -143,11 +124,10 @@ class _HomepageState extends State<Homepage> {
                 if (_VController.text.isNotEmpty) {
                   printtext();
                 } else {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('NO Vehicl Number!!')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('NO Vehicle Number!!')),
+                  );
                 }
-
                 Navigator.of(context).pop(); // Close the dialog
               },
               child: Text("Print"),
@@ -164,75 +144,105 @@ class _HomepageState extends State<Homepage> {
     RID = Ticket.generateReceiptID();
     String CT = DateTime.now().toIso8601String();
 
-    await SunmiPrinter.printText(
-      'Kathmandu-mall \nParking Slip',
-      style: SunmiTextStyle(bold: true, fontSize: 40),
-    );
+    // Check vehicle type for specific formatting
+    if (VehicleType == "CINEMA_BIKE") {
+      await SunmiPrinter.printText(
+        'Ranjana Trade Center \nParking Slip \nGrand Machhapuchehhre Technology',
+        style: SunmiTextStyle(bold: true, fontSize: 35),
+      );
 
-    await SunmiPrinter.lineWrap(20);
+      await SunmiPrinter.lineWrap(20);
 
-    await SunmiPrinter.printText(
-      'Vehicle Number: $VN  \nVehicle Type: $VT \nReceipt ID: $RID \nCheck-in BY: $first_name $last_name \nCheck-in Time: $CT',
-      style: SunmiTextStyle(bold: true, fontSize: 30),
-    );
+      await SunmiPrinter.printText(
+        'Vehicle Number: $VN  \nVehicle Type: $VT \nReceipt ID: $RID \nCheck-in BY: $first_name $last_name \nCheck-in Time: $CT \nPrice: Rs.50',
+        style: SunmiTextStyle(bold: true, fontSize: 25),
+      );
 
-    await SunmiPrinter.lineWrap(30);
+      await SunmiPrinter.lineWrap(20);
 
-    await SunmiPrinter.printQRCode(
-      '${VN} ; ${VT} ;${RID} ;${CT.toString()}',
-      style: SunmiQrcodeStyle(
-        align: SunmiPrintAlign.CENTER,
-        qrcodeSize: 8,
-        errorLevel: SunmiQrcodeLevel.LEVEL_Q,
-      ),
-    );
+      await SunmiPrinter.printQRCode(
+        '$VN ; $VT ;$RID ;$CT',
+        style: SunmiQrcodeStyle(
+          align: SunmiPrintAlign.CENTER,
+          qrcodeSize: 4, // Reduced from 8 to 4 for smaller QR
+          errorLevel: SunmiQrcodeLevel.LEVEL_Q,
+        ),
+      );
 
-    await SunmiPrinter.lineWrap(30);
+      await SunmiPrinter.lineWrap(20);
 
-    await SunmiPrinter.printText(
-      "For your own convenience, please don't loose this slip'.\nIn case of lost, full charges will apply.",
-      style: SunmiTextStyle(bold: true, fontSize: 30),
-    );
+      await SunmiPrinter.printText(
+        "For your own convenience, please don't loose this slip'.\nIn case of lost, full charges will apply.",
+        style: SunmiTextStyle(bold: true, fontSize: 25),
+      );
 
-    await SunmiPrinter.lineWrap(140); // Jump 2 lines
+      await SunmiPrinter.lineWrap(140);
+    } else if (VehicleType == "CINEMA_CAR") {
+      await SunmiPrinter.printText(
+        'Ranjana Trade Center \nParking Slip \nGrand Machhapuchehhre Technology',
+        style: SunmiTextStyle(bold: true, fontSize: 35),
+      );
 
-    // await _senraisePrinterPlugin.setAlignment(0);
-    // await _senraisePrinterPlugin.setTextBold(true);
-    // await _senraisePrinterPlugin.setTextSize(40);
-    // await _senraisePrinterPlugin.printText("Parking Slip\n");
+      await SunmiPrinter.lineWrap(20);
 
-    // // new txt from here##########
-    // await _senraisePrinterPlugin.setAlignment(0);
-    // await _senraisePrinterPlugin.nextLine(1);
-    // await _senraisePrinterPlugin.setTextBold(false);
-    // await _senraisePrinterPlugin.setTextSize(30);
-    // await _senraisePrinterPlugin.printText(
-    //   "Vehicle Number: ${VN} \nVehicle Type: ${VT} \nReceipt ID: ${RID} \nCheck-in Time: ${CT}",
-    // );
+      await SunmiPrinter.printText(
+        'Vehicle Number: $VN  \nVehicle Type: $VT \nReceipt ID: $RID \nCheck-in BY: $first_name $last_name \nCheck-in Time: $CT \nPrice: Rs.100',
+        style: SunmiTextStyle(bold: true, fontSize: 25),
+      );
 
-    // //QR code data
+      await SunmiPrinter.lineWrap(20);
 
-    // await _senraisePrinterPlugin.nextLine(2);
-    // await _senraisePrinterPlugin.setAlignment(1);
-    // await _senraisePrinterPlugin.printQRCode(
-    //   "${VN} ; ${VT} ;${RID} ;${CT.toString()}",
-    //   7,
-    //   4,
-    // );
+      await SunmiPrinter.printQRCode(
+        '$VN ; $VT ;$RID ;$CT',
+        style: SunmiQrcodeStyle(
+          align: SunmiPrintAlign.CENTER,
+          qrcodeSize: 4, // Reduced from 8 to 4 for smaller QR
+          errorLevel: SunmiQrcodeLevel.LEVEL_Q,
+        ),
+      );
 
-    // // new txt from here##########
+      await SunmiPrinter.lineWrap(20);
 
-    // await _senraisePrinterPlugin.nextLine(2);
-    // await _senraisePrinterPlugin.setAlignment(0);
-    // await _senraisePrinterPlugin.setTextBold(false);
-    // await _senraisePrinterPlugin.setTextSize(30);
-    // await _senraisePrinterPlugin.printText(
-    //   "For your own convenience Please don't loose this slip'\nIn case of lost, full charges will be apply",
-    // );
+      await SunmiPrinter.printText(
+        "For your own convenience, please don't loose this slip'.\nIn case of lost, full charges will apply.",
+        style: SunmiTextStyle(bold: true, fontSize: 25),
+      );
 
-    // //gap for the butom #######################
+      await SunmiPrinter.lineWrap(140);
+    } else {
+      // Original printing logic for other vehicle types
+      await SunmiPrinter.printText(
+        'Ranjana Trade Center \nParking Slip \nGrand Machhapuchehhre Technology',
+        style: SunmiTextStyle(bold: true, fontSize: 35),
+      );
 
-    // await _senraisePrinterPlugin.nextLine(4);
+      await SunmiPrinter.lineWrap(20);
+
+      await SunmiPrinter.printText(
+        'Vehicle Number: $VN  \nVehicle Type: $VT \nReceipt ID: $RID \nCheck-in BY: $first_name $last_name \nCheck-in Time: $CT',
+        style: SunmiTextStyle(bold: true, fontSize: 25),
+      );
+
+      await SunmiPrinter.lineWrap(20);
+
+      await SunmiPrinter.printQRCode(
+        '$VN ; $VT ;$RID ;$CT',
+        style: SunmiQrcodeStyle(
+          align: SunmiPrintAlign.CENTER,
+          qrcodeSize: 4, // Reduced from 8 to 4 for smaller QR
+          errorLevel: SunmiQrcodeLevel.LEVEL_Q,
+        ),
+      );
+
+      await SunmiPrinter.lineWrap(20);
+
+      await SunmiPrinter.printText(
+        "For your own convenience, please don't loose this slip'.\nIn case of lost, full charges will apply.",
+        style: SunmiTextStyle(bold: true, fontSize: 25),
+      );
+
+      await SunmiPrinter.lineWrap(140);
+    }
 
     // Save check-in data locally in SQLite
     final dbHelper = DatabaseHelper.instance;
@@ -264,7 +274,84 @@ class _HomepageState extends State<Homepage> {
       vehicleType: "$VT",
       checkinTime: "$CT",
       checkedinBy: "$id",
-      token: token, // Passing the dynamic token
+      token: token,
+    );
+
+    print(checkInResponse);
+  }
+
+  void printAllDayText(
+    String vehicleType,
+    String price, {
+    String parkingType = "",
+  }) async {
+    String RID = Ticket.generateReceiptID();
+    String CT = DateTime.now().toIso8601String();
+
+    await SunmiPrinter.printText(
+      'Ranjana Trade Center \nParking Slip \nGrand Machhapuchehhre Technology',
+      style: SunmiTextStyle(bold: true, fontSize: 35),
+    );
+
+    await SunmiPrinter.lineWrap(20);
+
+    await SunmiPrinter.printText(
+      'Vehicle Number: ---  \nVehicle Type: $vehicleType${parkingType.isNotEmpty ? " ($parkingType)" : ""} \nReceipt ID: $RID \nCheck-in BY: $first_name $last_name \nCheck-in Time: $CT \nPrice: $price',
+      style: SunmiTextStyle(bold: true, fontSize: 25),
+    );
+
+    await SunmiPrinter.lineWrap(20);
+
+    await SunmiPrinter.printQRCode(
+      '--- ; $vehicleType${parkingType.isNotEmpty ? " ($parkingType)" : ""} ;$RID ;$CT',
+      style: SunmiQrcodeStyle(
+        align: SunmiPrintAlign.CENTER,
+        qrcodeSize: 4, // Reduced from 8 to 4 for smaller QR
+        errorLevel: SunmiQrcodeLevel.LEVEL_Q,
+      ),
+    );
+
+    await SunmiPrinter.lineWrap(20);
+
+    await SunmiPrinter.printText(
+      "For your own convenience, please don't loose this slip'.\nIn case of lost, full charges will apply.",
+      style: SunmiTextStyle(bold: true, fontSize: 25),
+    );
+
+    await SunmiPrinter.lineWrap(140);
+
+    // Save check-in data locally in SQLite
+    final dbHelper = DatabaseHelper.instance;
+
+    try {
+      final existingRecord = await dbHelper.fetchByReceiptId(RID);
+
+      if (existingRecord == null) {
+        await dbHelper.insertData({
+          'receipt_id': RID,
+          'vehicle_number': '---',
+          'vehicle_type':
+              '$vehicleType${parkingType.isNotEmpty ? " ($parkingType)" : ""}',
+          'checkin_time': CT,
+          'checkedin_by': id,
+        });
+        print('Check-in data saved locally!');
+      } else {
+        print('Vehicle already checked in with this receipt ID.');
+      }
+    } catch (e) {
+      print('Error saving check-in data locally: $e');
+    }
+
+    // For Check-in this for API
+    final checkInResponse = await vehicleService.checkIn(
+      receiptId: "$RID",
+      vehicleNumber: "---",
+      vehicleType:
+          '$vehicleType${parkingType.isNotEmpty ? " ($parkingType)" : ""}',
+      checkinTime: "$CT",
+      checkedinBy: "$id",
+      token: token,
     );
 
     print(checkInResponse);
@@ -272,8 +359,6 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
-    // double width = MediaQuery.of(context).size.width;
-    // double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: Text("Parking app"),
@@ -291,8 +376,6 @@ class _HomepageState extends State<Homepage> {
                   },
                   child: CircleAvatar(
                     radius: 22,
-
-                    // conveti it in icone
                     backgroundImage: AssetImage("assets/user.jpg"),
                     onBackgroundImageError: (_, __) => const Icon(Icons.error),
                   ),
@@ -311,12 +394,10 @@ class _HomepageState extends State<Homepage> {
             child: Column(
               children: [
                 SizedBox(height: 10),
-
                 Text(
                   "Vehicle Type",
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
-
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -357,29 +438,158 @@ class _HomepageState extends State<Homepage> {
                     ),
                   ],
                 ),
-
-                // hevy truck ?????????????????????????????
-                SizedBox(
-                  height: 160,
-                  width: 160,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        VehicleType = "HEAVY_VEHICLE";
-                      });
-                      _showPopup(context);
-                    },
-                    child: Card(
-                      elevation: 20,
-                      color: Colors.white,
-                      child: Image.asset("assets/big.png"),
-                    ),
-                  ),
-                ),
-
                 SizedBox(height: 20),
-
-                // exit point #########################################
+                // Cinema Bike and Cinema Car buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      height: 100,
+                      width: 160,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            VehicleType = "CINEMA_BIKE";
+                          });
+                          _showPopup(context);
+                        },
+                        child: Card(
+                          elevation: 15,
+                          color: Colors.blue,
+                          child: Center(
+                            child: Text(
+                              "Cinema Bike",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 100,
+                      width: 160,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            VehicleType = "CINEMA_CAR";
+                          });
+                          _showPopup(context);
+                        },
+                        child: Card(
+                          elevation: 15,
+                          color: Colors.blue,
+                          child: Center(
+                            child: Text(
+                              "Cinema Car",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                // All Day Bike and All Day Car buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      height: 100,
+                      width: 160,
+                      child: InkWell(
+                        onTap: () {
+                          printAllDayText("ALL_DAY_BIKE", "Rs.150");
+                        },
+                        child: Card(
+                          elevation: 15,
+                          color: Colors.green,
+                          child: Center(
+                            child: Text(
+                              "All Day Bike",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 100,
+                      width: 160,
+                      child: InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Select Parking Type"),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        printAllDayText(
+                                          "ALL_DAY_CAR",
+                                          "Rs.350",
+                                          parkingType: "Inhouse",
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("Inhouse"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        printAllDayText(
+                                          "ALL_DAY_CAR",
+                                          "Rs.400",
+                                          parkingType: "Outsider",
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("Outsider"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        child: Card(
+                          elevation: 15,
+                          color: Colors.green,
+                          child: Center(
+                            child: Text(
+                              "All Day Car",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                // exit point
                 GestureDetector(
                   onTap: () {
                     goto_exit();
@@ -410,13 +620,6 @@ class _HomepageState extends State<Homepage> {
       ),
     );
   }
-
-  // void goto_history() {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(builder: (context) => HistoryPage()),
-  //   );
-  // }
 
   void goto_exit() {
     Navigator.push(context, MaterialPageRoute(builder: (context) => Exit()));

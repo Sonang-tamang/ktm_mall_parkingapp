@@ -13,12 +13,9 @@ class ChangeBaseRateDialog extends StatefulWidget {
 class _ChangeBaseRateDialogState extends State<ChangeBaseRateDialog> {
   final TextEditingController _two = TextEditingController();
   final TextEditingController _four = TextEditingController();
-  final TextEditingController _heavy = TextEditingController();
-  final TextEditingController _passcode = TextEditingController();
 
-  double crunnet_two_rate = 0;
-  double crunnet_four_rate = 0;
-  double crunnet_heavy_rate = 0;
+  double currentTwoRate = 0;
+  double currentFourRate = 0;
   String token = "";
 
   @override
@@ -30,58 +27,58 @@ class _ChangeBaseRateDialogState extends State<ChangeBaseRateDialog> {
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Fetch stored data
     double? storedTwoWheelerRate = prefs.getDouble('two_wheeler_rate');
     double? storedFourWheelerRate = prefs.getDouble('four_wheeler_rate');
-    double? storedHeavyVehicleRate = prefs.getDouble('heavy_vehicle_rate');
-    String? storedtoken = prefs.getString('token');
+    String? storedToken = prefs.getString('token');
 
-    // Log the values
     print('Stored Two-Wheeler Rate: $storedTwoWheelerRate');
     print('Stored Four-Wheeler Rate: $storedFourWheelerRate');
-    print('Stored Heavy Vehicle Rate: $storedHeavyVehicleRate');
-    print('Store token $storedtoken');
+    print('Stored token: $storedToken');
 
-    // Update the state to reflect changes
-    // setState(() {
-    //   crunnet_two_rate = storedTwoWheelerRate ?? 0; // Default to 0 if not found
-    //   crunnet_four_rate = storedFourWheelerRate ?? 0;
-    //   crunnet_heavy_rate = storedHeavyVehicleRate ?? 0;
-    //   token = storedtoken ?? "";
-    // });
     if (mounted) {
       setState(() {
-        crunnet_two_rate =
-            storedTwoWheelerRate ?? 0; // Default to 0 if not found
-        crunnet_four_rate = storedFourWheelerRate ?? 0;
-        crunnet_heavy_rate = storedHeavyVehicleRate ?? 0;
-        token = storedtoken ?? "";
+        currentTwoRate = storedTwoWheelerRate ?? 0;
+        currentFourRate = storedFourWheelerRate ?? 0;
+        token = storedToken ?? "";
       });
     }
   }
 
-  // Update the rates on the server
   void updateRates() async {
-    String passcode =
-        _passcode.text.trim(); // Replace with the correct passcode
+    double? parseDouble(String? value) {
+      if (value == null || value.trim().isEmpty) return null;
+      return double.tryParse(value.trim());
+    }
 
-    double two = double.parse(_two.text.trim());
-    double four = double.parse(_four.text.trim());
-    double heavy = double.parse(_heavy.text.trim());
-    bool success = await BaseRateService.updateBaseRate(
-      token,
-      two, // Two-wheeler rate
-      four, // Four-wheeler rate
-      heavy, // Heavy vehicle rate
-      passcode,
-    );
+    final two = parseDouble(_two.text);
+    final four = parseDouble(_four.text);
+
+    print('Input - Two Wheeler: ${_two.text} Parsed: $two');
+    print('Input - Four Wheeler: ${_four.text} Parsed: $four');
+    print('Token: $token');
+
+    if (two == null || four == null) {
+      print('Validation failed: Invalid rates');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter valid rates')));
+      return;
+    }
+
+    print('Calling BaseRateService.updateBaseRate...');
+    bool success = await BaseRateService.updateBaseRate(token, two, four);
+
+    print('UpdateBaseRate result: $success');
 
     if (success) {
       print('Rates updated successfully');
-      fetchRates();
+      await fetchRates();
       goto_home();
     } else {
       print('Failed to update rates');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to update rates')));
     }
   }
 
@@ -92,192 +89,115 @@ class _ChangeBaseRateDialogState extends State<ChangeBaseRateDialog> {
     );
   }
 
-  void fetchRates() async {
+  Future<void> fetchRates() async {
     var rates = await BaseRateService.getBaseRates(token);
     if (rates != null) {
-      print('Two-wheeler rate: ${rates['two_wheeler_rate']}');
-      print('Four-wheeler rate: ${rates['four_wheeler_rate']}');
-      print('Heavy vehicle rate: ${rates['heavy_vehicle_rate']}');
+      print('Fetched Two-wheeler rate: ${rates['two_wheeler_rate']}');
+      print('Fetched Four-wheeler rate: ${rates['four_wheeler_rate']}');
+      if (mounted) {
+        setState(() {
+          currentTwoRate = rates['two_wheeler_rate'];
+          currentFourRate = rates['four_wheeler_rate'];
+        });
+      }
     } else {
       print('Failed to fetch rates');
     }
-    _loadUserData();
+    await _loadUserData();
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Change Base Rate"),
+      title: const Text("Change Base Rate"),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "two wheeler rate \nCurrent: RS $crunnet_two_rate",
-                      style: TextStyle(fontSize: 15),
-                    ),
-
-                    // text fild ###########################33
-                    SizedBox(
-                      width: 100,
-                      height: 60,
-                      child:
-                      // text fild ############
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          controller: _two,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.tertiary,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black),
-                            ),
-                            // labelText: "username*",
-                            hintStyle: TextStyle(fontWeight: FontWeight.w300),
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  "Two wheeler rate\nCurrent: RS $currentTwoRate",
+                  style: const TextStyle(fontSize: 15),
                 ),
-
-                // second fild ########################################################
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "four wheeler rate\nCurrent: RS $crunnet_four_rate",
-                      style: TextStyle(fontSize: 15),
-                    ),
-
-                    // text fild ###########################33
-                    SizedBox(
-                      width: 100,
-                      height: 60,
-                      child:
-                      // text fild ############
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          controller: _four,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.tertiary,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black),
-                            ),
-                            // labelText: "username*",
-                            hintStyle: TextStyle(fontWeight: FontWeight.w300),
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // thinrd fild ###########################################################3
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "heavy vehicle rate\nCurrent: RS $crunnet_heavy_rate",
-                      style: TextStyle(fontSize: 15),
-                    ),
-
-                    // text fild ###########################33
-                    SizedBox(
-                      width: 100,
-                      height: 60,
-                      child:
-                      // text fild ############
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          controller: _heavy,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.tertiary,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black),
-                            ),
-
-                            // labelText: "username*",
-                            hintStyle: TextStyle(fontWeight: FontWeight.w300),
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 10),
-
-                Text("Enter your passcode", style: TextStyle(fontSize: 16)),
-
-                // text fild ############
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: _passcode,
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.tertiary,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-
-                      // labelText: "username*",
-                      hintStyle: TextStyle(fontWeight: FontWeight.w300),
-                    ),
-                    // keyboardType: TextInputType.number,
-                  ),
-                ),
-
-                // button for updating ##################################
                 SizedBox(
-                  height: 70,
-                  width: 120,
-                  child: InkWell(
-                    onTap: () {
-                      updateRates();
-                    },
-                    child: Card(
-                      color: Colors.blue,
-                      child: Center(
-                        child: Text(
-                          "Update",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                  width: 100,
+                  height: 60,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: _two,
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.tertiary,
                           ),
                         ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                        hintStyle: const TextStyle(fontWeight: FontWeight.w300),
                       ),
+                      keyboardType: TextInputType.number,
                     ),
                   ),
                 ),
               ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Four wheeler rate\nCurrent: RS $currentFourRate",
+                  style: const TextStyle(fontSize: 15),
+                ),
+                SizedBox(
+                  width: 100,
+                  height: 60,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: _four,
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.tertiary,
+                          ),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                        hintStyle: const TextStyle(fontWeight: FontWeight.w300),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 70,
+              width: 120,
+              child: InkWell(
+                onTap: () {
+                  updateRates();
+                },
+                child: Card(
+                  color: Colors.blue,
+                  child: const Center(
+                    child: Text(
+                      "Update",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
